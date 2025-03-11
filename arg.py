@@ -85,7 +85,7 @@ div[data-testid="metric-container"] .css-1vuvp8l {
 """, unsafe_allow_html=True)
 
 # Dividir la página en columnas con nueva proporción para que el gráfico sea menos ancho
-col1, col2 = st.columns([0.3, 0.5], gap="small")
+col1, col2 = st.columns([0.1, 0.1], gap="small")
 with col1:
     st.metric(label="Brecha Cambiaria (%)", value=f"{brecha_pct:.2f}%")
     st.caption(f"Último dato: {fecha_ultimo}")
