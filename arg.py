@@ -1,111 +1,55 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 
-# Configurar la página para usar ancho completo
+# Configurar la página en ancho completo
 st.set_page_config(layout="wide")
-st.title("Dashboard de Indicadores Argentina")
 
-# Cargar el archivo Excel
+# Título centrado
+st.markdown("<h1 style='text-align: center;'>Monitoreo - Argentina</h1>", unsafe_allow_html=True)
+
+# Cargar la hoja 'diarios' del archivo Excel
 data_file = 'indicadores_arg.xlsx'
 xls = pd.ExcelFile(data_file)
-
-# Leer los datos de cada hoja
-df_mes = pd.read_excel(xls, sheet_name='Mes')
 df_diarios = pd.read_excel(xls, sheet_name='diarios')
 
-# Limpiar nombres de columnas para evitar problemas de espacios o diferencias en mayúsculas
-df_mes.columns = df_mes.columns.str.strip()
+# Limpiar nombres de columnas para evitar espacios u otros caracteres extra
 df_diarios.columns = df_diarios.columns.str.strip()
 
-# Convertir las columnas de fecha a datetime
-df_mes['fecha_mes'] = pd.to_datetime(df_mes['fecha_mes'])
-df_diarios['fecha_itcrm'] = pd.to_datetime(df_diarios['fecha_itcrm'])
-df_diarios['fecha_rin'] = pd.to_datetime(df_diarios['fecha_rin'])
-df_diarios['fecha_riesgopais'] = pd.to_datetime(df_diarios['fecha_riesgopais'])
+# Convertir la columna de fecha a formato datetime
 df_diarios['fecha_tc'] = pd.to_datetime(df_diarios['fecha_tc'])
 
-######################
-# Sección: Datos Mensuales
-######################
-st.header("Datos Mensuales")
+# Ordenar por fecha (opcional) y obtener el último dato para calcular la brecha cambiaria
+df_diarios = df_diarios.sort_values(by='fecha_tc')
+latest_data = df_diarios.iloc[-1]
 
-# Gráfico 1: Evolución de IPC Interanual (varios indicadores)
-st.subheader("Evolución de IPC Interanual")
-fig_ipc = go.Figure()
-fig_ipc.add_trace(go.Scatter(x=df_mes['fecha_mes'], y=df_mes['ipc_yoy_general'],
-                             mode='lines+markers', name='IPC YoY General'))
-fig_ipc.add_trace(go.Scatter(x=df_mes['fecha_mes'], y=df_mes['ipc_yoy_estacional'],
-                             mode='lines+markers', name='IPC YoY Estacional'))
-fig_ipc.add_trace(go.Scatter(x=df_mes['fecha_mes'], y=df_mes['ipc_yoy_nucleo'],
-                             mode='lines+markers', name='IPC YoY Núcleo'))
-fig_ipc.add_trace(go.Scatter(x=df_mes['fecha_mes'], y=df_mes['ipc_yoy_regulados'],
-                             mode='lines+markers', name='IPC YoY Regulados'))
-fig_ipc.update_layout(
-    title="Evolución de IPC Interanual",
-    xaxis_title="Fecha",
-    yaxis_title="Variación (%)"
-)
-st.plotly_chart(fig_ipc, use_container_width=True)
+# Calcular la brecha cambiaria: diferencia entre Blue y Oficial
+brecha = latest_data['Blue'] - latest_data['Oficial']
 
-# Gráfico 2: Evolución del IPC Mom General
-st.subheader("Evolución del IPC Mom General")
-fig_ipc_mom = px.line(df_mes, x='fecha_mes', y='ipc_mom_general', 
-                      title="Evolución del IPC Mom General",
-                      labels={'fecha_mes': 'Fecha', 'ipc_mom_general': 'IPC Mom General'})
-st.plotly_chart(fig_ipc_mom, use_container_width=True)
-
-# Gráfico 3: Exportaciones e Importaciones
-st.subheader("Exportaciones e Importaciones")
-fig_trade = go.Figure()
-fig_trade.add_trace(go.Scatter(x=df_mes['fecha_mes'], y=df_mes['exports'],
-                               mode='lines+markers', name='Exportaciones'))
-fig_trade.add_trace(go.Scatter(x=df_mes['fecha_mes'], y=df_mes['imports'],
-                               mode='lines+markers', name='Importaciones'))
-fig_trade.update_layout(
-    title="Exportaciones e Importaciones",
-    xaxis_title="Fecha",
-    yaxis_title="Valor"
-)
-st.plotly_chart(fig_trade, use_container_width=True)
-
-######################
-# Sección: Datos Diarios
-######################
-st.header("Datos Diarios")
-
-# Gráfico 4: Evolución del ITCRM
-st.subheader("Evolución del ITCRM")
-fig_itcrm = px.line(df_diarios, x='fecha_itcrm', y='itcrm', 
-                    title="Evolución del ITCRM",
-                    labels={'fecha_itcrm': 'Fecha', 'itcrm': 'ITCRM'})
-st.plotly_chart(fig_itcrm, use_container_width=True)
-
-# Gráfico 5: Reservas Internacionales
-st.subheader("Reservas Internacionales")
-fig_reservas = px.line(df_diarios, x='fecha_rin', y='Reservas', 
-                       title="Reservas Internacionales",
-                       labels={'fecha_rin': 'Fecha', 'Reservas': 'Reservas'})
-st.plotly_chart(fig_reservas, use_container_width=True)
-
-# Gráfico 6: Riesgo País
-st.subheader("Riesgo País")
-fig_riesgo = px.line(df_diarios, x='fecha_riesgopais', y='riesgopais', 
-                     title="Riesgo País",
-                     labels={'fecha_riesgopais': 'Fecha', 'riesgopais': 'Riesgo País'})
-st.plotly_chart(fig_riesgo, use_container_width=True)
-
-# Gráfico 7: Tipo de Cambio (Oficial vs Blue)
-st.subheader("Tipo de Cambio (Oficial vs Blue)")
-fig_tc = go.Figure()
-fig_tc.add_trace(go.Scatter(x=df_diarios['fecha_tc'], y=df_diarios['Oficial'],
-                            mode='lines+markers', name='Oficial'))
-fig_tc.add_trace(go.Scatter(x=df_diarios['fecha_tc'], y=df_diarios['Blue'],
-                            mode='lines+markers', name='Blue'))
-fig_tc.update_layout(
-    title="Tipo de Cambio (Oficial vs Blue)",
-    xaxis_title="Fecha",
-    yaxis_title="Valor"
-)
-st.plotly_chart(fig_tc, use_container_width=True)
+# Crear un value box usando columnas: una para la métrica y otra para el mini gráfico
+col1, col2 = st.columns([1, 2])
+with col1:
+    st.metric(label="Brecha Cambiaria", value=f"{brecha:.2f}")
+with col2:
+    # Crear mini gráfico con Plotly para mostrar ambas series
+    mini_fig = go.Figure()
+    mini_fig.add_trace(go.Scatter(
+        x=df_diarios['fecha_tc'], y=df_diarios['Oficial'],
+        mode='lines', name='Oficial'
+    ))
+    mini_fig.add_trace(go.Scatter(
+        x=df_diarios['fecha_tc'], y=df_diarios['Blue'],
+        mode='lines', name='Blue'
+    ))
+    mini_fig.update_layout(
+        margin=dict(l=20, r=20, t=20, b=20),
+        height=200,
+        xaxis_title=None,
+        yaxis_title=None,
+        showlegend=True
+    )
+    st.plotly_chart(mini_fig, use_container_width=True)
+    
+    # Expander para ver el gráfico en tamaño completo
+    with st.expander("Ampliar gráfico"):
+        st.plotly_chart(mini_fig, use_container_width=True)
