@@ -1,5 +1,7 @@
 import streamlit as st
-st.set_page_config(layout="wide")  # Debe ir como primera instrucción
+
+# Debe ir como primera instrucción
+st.set_page_config(layout="wide")
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -47,8 +49,8 @@ mini_fig.update_layout(
 # Título centrado
 st.markdown("<h1 style='text-align: center;'>Monitoreo - Argentina</h1>", unsafe_allow_html=True)
 
-# Colocar el value box y el gráfico en la misma fila (horizontalmente)
-col1, col2 = st.columns([1, 2])
+# Ubicar el 'value box' y el gráfico en la misma fila, con poco espacio entre columnas
+col1, col2 = st.columns([1, 2], gap="small")
 with col1:
     st.metric(label="Brecha Cambiaria (%)", value=f"{brecha_pct:.2f}%")
     st.caption(f"Último dato: {fecha_ultimo}")
