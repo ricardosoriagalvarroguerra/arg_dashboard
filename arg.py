@@ -32,7 +32,7 @@ latest_data = df_diarios.iloc[-1]
 brecha_pct = ((latest_data['Blue'] - latest_data['Oficial']) / latest_data['Oficial']) * 100
 fecha_ultimo = latest_data['fecha_tc'].strftime('%Y-%m-%d')
 
-# Crear mini gráfico con Plotly para mostrar Oficial vs Blue, más condensado
+# Crear mini gráfico con Plotly para mostrar Oficial vs Blue, menos ancho
 mini_fig = go.Figure()
 mini_fig.add_trace(go.Scatter(
     x=df_diarios['fecha_tc'], y=df_diarios['Oficial'],
@@ -44,12 +44,13 @@ mini_fig.add_trace(go.Scatter(
 ))
 mini_fig.update_layout(
     margin=dict(l=5, r=5, t=5, b=5),  # márgenes reducidos
-    height=150,                      # altura más baja para mayor condensación
+    width=500,                      # Fija el ancho del gráfico (ajusta según necesites)
+    height=150,                     # Altura reducida para mantenerlo condensado
     xaxis_title=None,
     yaxis_title=None,
     showlegend=True,
     legend=dict(
-        orientation="h",             # leyenda horizontal para ocupar menos espacio vertical
+        orientation="h",          # Leyenda horizontal para aprovechar mejor el espacio
         yanchor="bottom",
         y=1,
         xanchor="center",
@@ -61,7 +62,7 @@ mini_fig.update_layout(
 st.markdown("<h1 style='text-align: center;'>Monitoreo - Argentina</h1>", unsafe_allow_html=True)
 
 ###############################################################################
-# CSS para ajustar el contenedor del value box (st.metric) – si lo deseas
+# CSS para ajustar el contenedor del value box (st.metric)
 ###############################################################################
 st.markdown("""
 <style>
@@ -83,10 +84,11 @@ div[data-testid="metric-container"] .css-1vuvp8l {
 </style>
 """, unsafe_allow_html=True)
 
-# Dividir la página en columnas, la primera para la métrica (más angosta) y la segunda para el gráfico
-col1, col2 = st.columns([0.8, 2], gap="small")
+# Dividir la página en columnas con nueva proporción para que el gráfico sea menos ancho
+col1, col2 = st.columns([0.8, 1.2], gap="small")
 with col1:
     st.metric(label="Brecha Cambiaria (%)", value=f"{brecha_pct:.2f}%")
     st.caption(f"Último dato: {fecha_ultimo}")
 with col2:
-    st.plotly_chart(mini_fig, use_container_width=True, key="mini_chart")
+    # Se remueve use_container_width para respetar el ancho configurado en el layout del gráfico
+    st.plotly_chart(mini_fig, key="mini_chart")
