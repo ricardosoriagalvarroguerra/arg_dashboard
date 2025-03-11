@@ -48,8 +48,8 @@ with col2:
         yaxis_title=None,
         showlegend=True
     )
-    st.plotly_chart(mini_fig, use_container_width=True)
-    
+    st.plotly_chart(mini_fig, use_container_width=True, key="mini_chart")
+
     # Expander para ver el gráfico en tamaño completo
     with st.expander("Ampliar gráfico"):
-        st.plotly_chart(mini_fig, use_container_width=True)
+        st.plotly_chart(mini_fig, use_container_width=True, key="mini_chart_expanded")
