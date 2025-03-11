@@ -33,25 +33,31 @@ brecha_pct = ((latest_data['Blue'] - latest_data['Oficial']) / latest_data['Ofic
 fecha_ultimo = latest_data['fecha_tc'].strftime('%Y-%m-%d')
 
 ###############################################################################
-# Datos mensuales: Inflación mensual
+# Datos mensuales: Inflación mensual a partir de ipc_mom_general en la hoja "Mes"
 ###############################################################################
-df_inflacion = pd.read_excel(xls, sheet_name='inflacion')
-df_inflacion.columns = df_inflacion.columns.str.strip()
+df_mes = pd.read_excel(xls, sheet_name='Mes')
+df_mes.columns = df_mes.columns.str.strip()
 
-# Convertir 'fecha' a datetime y 'inflacion' a numérico
-df_inflacion['fecha'] = pd.to_datetime(df_inflacion['fecha'], errors='coerce')
-df_inflacion['inflacion'] = pd.to_numeric(
-    df_inflacion['inflacion'].astype(str).str.replace(',', '.').str.strip(), errors='coerce'
+# Convertir 'ipc_mom_general' a numérico
+df_mes['ipc_mom_general'] = pd.to_numeric(
+    df_mes['ipc_mom_general'].astype(str).str.replace(',', '.').str.strip(), errors='coerce'
 )
 
-# Eliminar filas inválidas y ordenar cronológicamente
-df_inflacion = df_inflacion.dropna(subset=['fecha', 'inflacion'])
-df_inflacion = df_inflacion.sort_values(by='fecha')
-
-# Tomar el último registro de inflación
-latest_inflacion = df_inflacion.iloc[-1]
-inflacion_value = latest_inflacion['inflacion']
-fecha_inflacion = latest_inflacion['fecha'].strftime('%Y-%m-%d')
+# Si existe una columna con la fecha (por ejemplo, 'Mes'), se procesa la fecha para ordenar cronológicamente
+if 'Mes' in df_mes.columns:
+    df_mes['Mes'] = pd.to_datetime(df_mes['Mes'], errors='coerce')
+    df_mes = df_mes.dropna(subset=['Mes', 'ipc_mom_general'])
+    df_mes = df_mes.sort_values(by='Mes')
+    latest_inflacion = df_mes.iloc[-1]
+    inflacion_value = latest_inflacion['ipc_mom_general']
+    fecha_inflacion = latest_inflacion['Mes'].strftime('%Y-%m')
+else:
+    # En caso de que no haya una columna de fecha, se toma el último registro según el orden original
+    df_mes = df_mes.dropna(subset=['ipc_mom_general'])
+    df_mes = df_mes.sort_index()
+    latest_inflacion = df_mes.iloc[-1]
+    inflacion_value = latest_inflacion['ipc_mom_general']
+    fecha_inflacion = "N/A"
 
 ###############################################################################
 # Configuración de estilo para los value boxes
