@@ -31,12 +31,16 @@ fecha_ultimo = latest_data['fecha_tc'].strftime('%Y-%m-%d')
 # Crear mini gráfico con Plotly para mostrar Oficial vs Blue
 mini_fig = go.Figure()
 mini_fig.add_trace(go.Scatter(
-    x=df_diarios['fecha_tc'], y=df_diarios['Oficial'],
-    mode='lines', name='Oficial'
+    x=df_diarios['fecha_tc'],
+    y=df_diarios['Oficial'],
+    mode='lines',
+    name='Oficial'
 ))
 mini_fig.add_trace(go.Scatter(
-    x=df_diarios['fecha_tc'], y=df_diarios['Blue'],
-    mode='lines', name='Blue'
+    x=df_diarios['fecha_tc'],
+    y=df_diarios['Blue'],
+    mode='lines',
+    name='Blue'
 ))
 mini_fig.update_layout(
     margin=dict(l=10, r=10, t=10, b=10),
@@ -49,8 +53,36 @@ mini_fig.update_layout(
 # Título centrado
 st.markdown("<h1 style='text-align: center;'>Monitoreo - Argentina</h1>", unsafe_allow_html=True)
 
-# Ubicar el 'value box' y el gráfico en la misma fila, con poco espacio entre columnas
-col1, col2 = st.columns([1, 2], gap="small")
+###############################################################################
+# CSS para ajustar la anchura y la apariencia del value box (st.metric)
+###############################################################################
+st.markdown("""
+<style>
+/* Ajusta el contenedor general de la métrica (st.metric) */
+div[data-testid="metric-container"] {
+    min-width: 0 !important;
+    width: 150px !important;  /* Controla la anchura total de la métrica */
+    padding: 0.4rem 0.5rem;   /* Ajusta el relleno interno */
+    border: 1px solid #CCC;   /* Opcional: un borde gris */
+    border-radius: 5px;       /* Opcional: esquinas redondeadas */
+}
+
+/* Ajusta el tamaño de fuente del label de la métrica */
+div[data-testid="metric-container"] label {
+    font-size: 0.85rem; /* Disminuye el texto del label */
+    color: #333;        /* Color del texto del label */
+}
+
+/* Ajusta el tamaño de fuente del valor de la métrica */
+div[data-testid="metric-container"] .css-1vuvp8l {
+    font-size: 1.2rem;  /* Disminuye el texto del valor principal */
+    color: #000;        /* Color del texto del valor */
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Dividimos la página en columnas con un gap pequeño (requiere Streamlit>=1.19)
+col1, col2 = st.columns([0.8, 2], gap="small")  # Ajusta [0.8, 2] según desees
 with col1:
     st.metric(label="Brecha Cambiaria (%)", value=f"{brecha_pct:.2f}%")
     st.caption(f"Último dato: {fecha_ultimo}")
