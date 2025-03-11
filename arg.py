@@ -82,7 +82,7 @@ div[data-testid="metric-container"] .css-1vuvp8l {
 """, unsafe_allow_html=True)
 
 # Dividimos la página en columnas con un gap pequeño (requiere Streamlit>=1.19)
-col1, col2 = st.columns([0.3, 2], gap="small")  # Ajusta [0.8, 2] según desees
+col1, col2 = st.columns([0.4, 2], gap="small")  # Ajusta [0.8, 2] según desees
 with col1:
     st.metric(label="Brecha Cambiaria (%)", value=f"{brecha_pct:.2f}%")
     st.caption(f"Último dato: {fecha_ultimo}")
