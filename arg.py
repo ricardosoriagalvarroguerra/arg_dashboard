@@ -16,8 +16,12 @@ df_diarios.columns = df_diarios.columns.str.strip()
 
 # Convertir 'fecha_tc' a datetime y 'Oficial' y 'Blue' a numérico
 df_diarios['fecha_tc'] = pd.to_datetime(df_diarios['fecha_tc'], errors='coerce')
-df_diarios['Oficial'] = pd.to_numeric(df_diarios['Oficial'].astype(str).str.replace(',', '.').str.strip(), errors='coerce')
-df_diarios['Blue'] = pd.to_numeric(df_diarios['Blue'].astype(str).str.replace(',', '.').str.strip(), errors='coerce')
+df_diarios['Oficial'] = pd.to_numeric(
+    df_diarios['Oficial'].astype(str).str.replace(',', '.').str.strip(), errors='coerce'
+)
+df_diarios['Blue'] = pd.to_numeric(
+    df_diarios['Blue'].astype(str).str.replace(',', '.').str.strip(), errors='coerce'
+)
 
 # Eliminar filas inválidas y ordenar cronológicamente
 df_diarios = df_diarios.dropna(subset=['fecha_tc', 'Oficial', 'Blue'])
@@ -28,61 +32,59 @@ latest_data = df_diarios.iloc[-1]
 brecha_pct = ((latest_data['Blue'] - latest_data['Oficial']) / latest_data['Oficial']) * 100
 fecha_ultimo = latest_data['fecha_tc'].strftime('%Y-%m-%d')
 
-# Crear mini gráfico con Plotly para mostrar Oficial vs Blue
+# Crear mini gráfico con Plotly para mostrar Oficial vs Blue, más condensado
 mini_fig = go.Figure()
 mini_fig.add_trace(go.Scatter(
-    x=df_diarios['fecha_tc'],
-    y=df_diarios['Oficial'],
-    mode='lines',
-    name='Oficial'
+    x=df_diarios['fecha_tc'], y=df_diarios['Oficial'],
+    mode='lines', name='Oficial'
 ))
 mini_fig.add_trace(go.Scatter(
-    x=df_diarios['fecha_tc'],
-    y=df_diarios['Blue'],
-    mode='lines',
-    name='Blue'
+    x=df_diarios['fecha_tc'], y=df_diarios['Blue'],
+    mode='lines', name='Blue'
 ))
 mini_fig.update_layout(
-    margin=dict(l=10, r=10, t=10, b=10),
-    height=200,
+    margin=dict(l=5, r=5, t=5, b=5),  # márgenes reducidos
+    height=150,                      # altura más baja para mayor condensación
     xaxis_title=None,
     yaxis_title=None,
-    showlegend=True
+    showlegend=True,
+    legend=dict(
+        orientation="h",             # leyenda horizontal para ocupar menos espacio vertical
+        yanchor="bottom",
+        y=1,
+        xanchor="center",
+        x=0.5
+    )
 )
 
 # Título centrado
 st.markdown("<h1 style='text-align: center;'>Monitoreo - Argentina</h1>", unsafe_allow_html=True)
 
 ###############################################################################
-# CSS para ajustar la anchura y la apariencia del value box (st.metric)
+# CSS para ajustar el contenedor del value box (st.metric) – si lo deseas
 ###############################################################################
 st.markdown("""
 <style>
-/* Ajusta el contenedor general de la métrica (st.metric) */
 div[data-testid="metric-container"] {
     min-width: 0 !important;
-    width: 150px !important;  /* Controla la anchura total de la métrica */
-    padding: 0.4rem 0.5rem;   /* Ajusta el relleno interno */
-    border: 1px solid #CCC;   /* Opcional: un borde gris */
-    border-radius: 5px;       /* Opcional: esquinas redondeadas */
+    width: 150px !important;  /* Ancho fijo para la métrica */
+    padding: 0.4rem 0.5rem;
+    border: 1px solid #CCC;
+    border-radius: 5px;
 }
-
-/* Ajusta el tamaño de fuente del label de la métrica */
 div[data-testid="metric-container"] label {
-    font-size: 0.85rem; /* Disminuye el texto del label */
-    color: #333;        /* Color del texto del label */
+    font-size: 0.85rem;
+    color: #333;
 }
-
-/* Ajusta el tamaño de fuente del valor de la métrica */
 div[data-testid="metric-container"] .css-1vuvp8l {
-    font-size: 1.2rem;  /* Disminuye el texto del valor principal */
-    color: #000;        /* Color del texto del valor */
+    font-size: 1.2rem;
+    color: #000;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# Dividimos la página en columnas con un gap pequeño (requiere Streamlit>=1.19)
-col1, col2 = st.columns([0.4, 2], gap="small")  # Ajusta [0.8, 2] según desees
+# Dividir la página en columnas, la primera para la métrica (más angosta) y la segunda para el gráfico
+col1, col2 = st.columns([0.8, 2], gap="small")
 with col1:
     st.metric(label="Brecha Cambiaria (%)", value=f"{brecha_pct:.2f}%")
     st.caption(f"Último dato: {fecha_ultimo}")
