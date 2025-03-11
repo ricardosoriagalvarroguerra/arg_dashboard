@@ -1,16 +1,17 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
 
 # Configuración de la página
 st.set_page_config(layout="wide")
 
-# Cargar datos de la hoja 'diarios'
+# Cargar datos del archivo Excel
 data_file = 'indicadores_arg.xlsx'
 xls = pd.ExcelFile(data_file)
-df_diarios = pd.read_excel(xls, sheet_name='diarios')
 
-# Limpiar nombres de columnas
+###############################################################################
+# Datos diarios: Tipo de cambio Oficial y Blue
+###############################################################################
+df_diarios = pd.read_excel(xls, sheet_name='diarios')
 df_diarios.columns = df_diarios.columns.str.strip()
 
 # Convertir 'fecha_tc' a datetime y 'Oficial' y 'Blue' a numérico
@@ -26,46 +27,39 @@ df_diarios['Blue'] = pd.to_numeric(
 df_diarios = df_diarios.dropna(subset=['fecha_tc', 'Oficial', 'Blue'])
 df_diarios = df_diarios.sort_values(by='fecha_tc')
 
-# Tomar el último registro para calcular la brecha y obtener la fecha
+# Tomar el último registro para calcular la brecha cambiaria
 latest_data = df_diarios.iloc[-1]
 brecha_pct = ((latest_data['Blue'] - latest_data['Oficial']) / latest_data['Oficial']) * 100
 fecha_ultimo = latest_data['fecha_tc'].strftime('%Y-%m-%d')
 
-# Definir ancho fijo para value box y gráfico
-element_width = 100
+###############################################################################
+# Datos mensuales: Inflación mensual
+###############################################################################
+df_inflacion = pd.read_excel(xls, sheet_name='inflacion')
+df_inflacion.columns = df_inflacion.columns.str.strip()
 
-# Crear mini gráfico con Plotly para mostrar Oficial vs Blue
-mini_fig = go.Figure()
-mini_fig.add_trace(go.Scatter(
-    x=df_diarios['fecha_tc'], y=df_diarios['Oficial'],
-    mode='lines', name='Oficial'
-))
-mini_fig.add_trace(go.Scatter(
-    x=df_diarios['fecha_tc'], y=df_diarios['Blue'],
-    mode='lines', name='Blue'
-))
-mini_fig.update_layout(
-    margin=dict(l=5, r=5, t=5, b=5),
-    width=element_width,   # ancho fijo
-    height=150,            # altura reducida
-    xaxis_title=None,
-    yaxis_title=None,
-    showlegend=True,
-    legend=dict(
-        orientation="h",
-        yanchor="bottom",
-        y=1,
-        xanchor="center",
-        x=0.5
-    )
+# Convertir 'fecha' a datetime y 'inflacion' a numérico
+df_inflacion['fecha'] = pd.to_datetime(df_inflacion['fecha'], errors='coerce')
+df_inflacion['inflacion'] = pd.to_numeric(
+    df_inflacion['inflacion'].astype(str).str.replace(',', '.').str.strip(), errors='coerce'
 )
 
-# Título centrado
-st.markdown("<h1 style='text-align: center;'>Monitoreo - Argentina</h1>", unsafe_allow_html=True)
+# Eliminar filas inválidas y ordenar cronológicamente
+df_inflacion = df_inflacion.dropna(subset=['fecha', 'inflacion'])
+df_inflacion = df_inflacion.sort_values(by='fecha')
+
+# Tomar el último registro de inflación
+latest_inflacion = df_inflacion.iloc[-1]
+inflacion_value = latest_inflacion['inflacion']
+fecha_inflacion = latest_inflacion['fecha'].strftime('%Y-%m-%d')
 
 ###############################################################################
-# CSS para ajustar el contenedor del value box (st.metric)
+# Configuración de estilo para los value boxes
 ###############################################################################
+element_width = 100
+
+st.markdown("<h1 style='text-align: center;'>Monitoreo - Argentina</h1>", unsafe_allow_html=True)
+
 st.markdown(f"""
 <style>
 div[data-testid="metric-container"] {{
@@ -86,11 +80,13 @@ div[data-testid="metric-container"] .css-1vuvp8l {{
 </style>
 """, unsafe_allow_html=True)
 
-# Dividir la página en dos columnas para que queden pegadas y con ancho fijo
+###############################################################################
+# Mostrar los indicadores en dos columnas: Brecha cambiaria e Inflación mensual
+###############################################################################
 col1, col2 = st.columns(2, gap="small")
 with col1:
     st.metric(label="Brecha Cambiaria (%)", value=f"{brecha_pct:.2f}%")
     st.caption(f"Último dato: {fecha_ultimo}")
 with col2:
-    # Se remueve use_container_width para respetar el ancho fijo configurado en el layout del gráfico
-    st.plotly_chart(mini_fig, use_container_width=False)
+    st.metric(label="Inflación Mensual (%)", value=f"{inflacion_value:.2f}%")
+    st.caption(f"Último dato: {fecha_inflacion}")
