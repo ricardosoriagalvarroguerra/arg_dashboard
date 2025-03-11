@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Configuración de la página para usar ancho completo
 st.set_page_config(layout="wide")
 st.title("Dashboard de Indicadores Argentina")
 
@@ -15,13 +14,19 @@ xls = pd.ExcelFile(data_file)
 df_mes = pd.read_excel(xls, sheet_name='Mes')
 df_diarios = pd.read_excel(xls, sheet_name='diarios')
 
+# Limpiar nombres de columnas para evitar problemas con espacios o caracteres no deseados
+df_mes.columns = df_mes.columns.str.strip()
+df_diarios.columns = df_diarios.columns.str.strip()
+
 # Convertir las columnas de fecha a datetime
 df_mes['fecha_mes'] = pd.to_datetime(df_mes['fecha_mes'])
-
 df_diarios['fecha_itcrm'] = pd.to_datetime(df_diarios['fecha_itcrm'])
 df_diarios['fecha_rin'] = pd.to_datetime(df_diarios['fecha_rin'])
 df_diarios['fecha_riesgopais'] = pd.to_datetime(df_diarios['fecha_riesgopais'])
 df_diarios['fecha_tc'] = pd.to_datetime(df_diarios['fecha_tc'])
+
+# Mostrar los nombres de las columnas para depuración (opcional)
+st.write("Columnas en df_diarios:", df_diarios.columns)
 
 # Crear pestañas para organizar los gráficos
 tab1, tab2 = st.tabs(["Datos Mensuales", "Datos Diarios"])
