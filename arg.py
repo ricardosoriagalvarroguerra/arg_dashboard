@@ -32,7 +32,7 @@ brecha_pct = ((latest_data['Blue'] - latest_data['Oficial']) / latest_data['Ofic
 fecha_ultimo = latest_data['fecha_tc'].strftime('%Y-%m-%d')
 
 # Definir ancho fijo para value box y gráfico
-element_width = 150
+element_width = 100
 
 # Crear mini gráfico con Plotly para mostrar Oficial vs Blue
 mini_fig = go.Figure()
