@@ -110,7 +110,7 @@ with col1:
         label="Brecha Cambiaria (%)",
         value=f"{brecha_pct:.2f}%",
         delta=f"{brecha_delta:+.2f}%" if brecha_delta is not None else None,
-        delta_color="inverse"  # Valor negativo se mostrará en verde, positivo en rojo
+        delta_color="inverse"  # Negativo: favorable (verde), positivo: desfavorable (rojo)
     )
     st.caption(f"Último dato: {fecha_ultimo}")
 with col2:
@@ -118,6 +118,6 @@ with col2:
         label="Inflación Mensual (%)",
         value=f"{inflacion_value:.2f}%",
         delta=f"{inflacion_delta:+.2f}%" if inflacion_delta is not None else None,
-        delta_color="inverse"  # Valor positivo se mostrará en rojo, negativo en verde
+        delta_color="inverse"  # Positivo: desfavorable (rojo), negativo: favorable (verde)
     )
     st.caption(f"Último dato: {fecha_mes}")
