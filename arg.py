@@ -11,7 +11,7 @@ xls = pd.ExcelFile(data_file)
 ###############################################################################
 # Datos diarios: Tipo de cambio Oficial y Blue
 ###############################################################################
-df_diarios = pd.read_excel(xls, sheet_name='diarios_mensuales')
+df_diarios = pd.read_excel(xls, sheet_name='diarios')
 df_diarios.columns = df_diarios.columns.str.strip()
 
 # Convertir 'fecha_tc' a datetime y 'Oficial' y 'Blue' a numérico
